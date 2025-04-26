@@ -1,0 +1,43 @@
+body {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #f0f0f0;
+}
+#toolbar {
+  padding: 10px;
+  background: #333;
+  color: white;
+  width: 100%;
+  text-align: center;
+}
+#toolbar input,
+#toolbar button {
+  margin: 0 5px;
+  padding: 5px;
+}
+#toolbar button {
+  transition: transform 0.2s ease;
+}
+#toolbar button:hover {
+  transform: scale(1.1);
+}
+#toolbar button:active {
+  transform: scale(0.95);
+}
+#canvas {
+  border: 2px solid #333;
+  background: white;
+  animation: fadeIn 1s ease forwards;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+

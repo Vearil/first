@@ -1,0 +1,42 @@
+{% extends "base.html" %} {% block css %}
+<link 
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/abar.css') }}"
+/>
+{% endblock %} 
+{% block title %}Borrow a Book{% endblock %} 
+
+{% block search %}
+<div class="search" >
+<form method="GET" role="search" action="{{ url_for('views.borrow') }}">
+    <input type="search" class="search-input" name="query"value="{{ query }}"placeholder="Search">
+    <button  type="submit" class="search-button">Search</button>
+</form>
+</div>
+{% endblock %}
+
+{% block content %}
+<h1 class="h">Borrow</h1>
+<div class="row">
+  {% for book in books %}
+  <div class="col-md-3">
+    <div class="book-card">
+      <h2> <strong> {{ book.name }} </strong> </h2>
+      <p class="author">{{ book.author }}</p>
+      <p class="status">{{ book.status }}</p>
+      {% if book.status == 'available' %}
+      <form method="POST" action="{{ url_for('views.borrow') }}">
+        <input type="hidden" name="book_id" value="{{ book.id }}">
+        <button type="submit" class="button">Borrow</button>
+      </form>
+      {% else %} 
+      <form method="POST" action="{{ url_for('views.borrow') }}">
+        <input type="hidden" name="book_id" value="{{ book.id }}">
+        <button type="submit" class="button-borrowed">Return</button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

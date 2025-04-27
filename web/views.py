@@ -108,7 +108,7 @@ def add_note():
     db.session.add(new_note)
     db.session.commit()
 
-    return {'message': 'Note added!'}, 200
+    return {'message': 'Note added!', 'note_id': new_note.id}, 200
 
 
 @views.route('/draw', methods=['GET', 'POST'])

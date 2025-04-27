@@ -47,6 +47,7 @@ function deleteBookNote(noteId, bookId) {
     });
 }
 
+
 //Flash autoclose
 document.addEventListener('DOMContentLoaded', () => {
   const alerts = document.querySelectorAll('.alert');
@@ -83,5 +84,37 @@ function toggleNotes() {
 
   
   
-};
+}
 
+document.addEventListener('DOMContentLoaded', function () {
+  const form = document.getElementById('noteForm');
+  const noteInput = document.getElementById('note');
+
+  form.addEventListener('submit', function (e) {
+      e.preventDefault(); // Stop form from actually submitting
+
+      const note = noteInput.value;
+      const bookId = form.getAttribute('data-book-id');
+
+      fetch("/add_note", {
+          method: "POST",
+          body: JSON.stringify({ note: note, book_id: bookId }),
+          headers: {
+              "Content-Type": "application/json"
+          }
+      })
+      .then(response => {
+          if (!response.ok) {
+              return response.json().then(data => { throw new Error(data.error); });
+          }
+          return response.json();
+      })
+      .then(data => {
+          alert(data.message);
+          noteInput.value = ''; // Clear textarea
+      })
+      .catch(error => {
+          alert(error.message);
+      });
+  });
+});

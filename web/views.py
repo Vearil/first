@@ -90,20 +90,25 @@ def book_notes(book_id):
 
     if book.user_id != current_user.id:
         return redirect(url_for('views.home'))
-    
-    if request.method == 'POST':
-        note = request.form.get('note')
-
-        if len(note) < 1:
-            flash('Note is too short!', category='error')
-        else:
-            new_note = Note(data=note, user_id=current_user.id, book_id=book_id)
-            db.session.add(new_note)
-            db.session.commit()
-            flash('Note added', category='success')
 
     return render_template("notes.html", user=current_user, book=book, book_id=book_id, user_id=current_user.id, pdf_path=pdf_path)
 
+@views.route('/add_note', methods=['POST'])
+@login_required
+def add_note():
+    data = request.get_json()
+
+    note = data.get('note')
+    book_id = data.get('book_id')
+
+    if not note or len(note) < 1:
+        return {'error': 'Note is too short!'}, 400
+
+    new_note = Note(data=note, user_id=current_user.id, book_id=book_id)
+    db.session.add(new_note)
+    db.session.commit()
+
+    return {'message': 'Note added!'}, 200
 
 
 @views.route('/draw', methods=['GET', 'POST'])

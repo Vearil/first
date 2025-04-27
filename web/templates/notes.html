@@ -28,13 +28,14 @@
       {% endfor %}
     </ul>
 
-    <form method="POST">
-      <textarea name="note" id="note" class="form-control"></textarea>
-      <br />
-      <div class="text-center">
-        <button type="submit" class="btn btn-primary">Add Note</button>
-      </div>
+    <form id="noteForm" data-book-id="{{ book_id }}">
+    <textarea name="note" id="note" class="form-control"></textarea>
+    <br />
+    <div class="text-center">
+      <button type="submit" class="btn btn-primary">Add Note</button>
+    </div>
     </form>
+
 
     <div>
       <button onClick="toggleLayout()" class="toggle"> 

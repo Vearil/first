@@ -89,9 +89,10 @@ function toggleNotes() {
 document.addEventListener('DOMContentLoaded', function () {
   const form = document.getElementById('noteForm');
   const noteInput = document.getElementById('note');
+  const notesList = document.getElementById('notes');
 
   form.addEventListener('submit', function (e) {
-      e.preventDefault(); // Stop form from actually submitting
+      e.preventDefault();
 
       const note = noteInput.value;
       const bookId = form.getAttribute('data-book-id');
@@ -111,10 +112,24 @@ document.addEventListener('DOMContentLoaded', function () {
       })
       .then(data => {
           alert(data.message);
-          noteInput.value = ''; // Clear textarea
+          noteInput.value = '';
+
+          // Create a new <li> element
+          const newNote = document.createElement('li');
+          newNote.className = 'list-group-item';
+          newNote.innerHTML = `
+              ${note}
+              <button type="button" class="close" onClick="deleteBookNote(${data.note_id}, ${bookId})">
+                  <span aria-hidden="true">&times;</span>
+              </button>
+          `;
+
+          // Append it to the notes list
+          notesList.appendChild(newNote);
       })
       .catch(error => {
           alert(error.message);
       });
   });
 });
+

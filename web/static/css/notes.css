@@ -153,6 +153,31 @@ button:focus {
   width: 33%;
 }
 
+.tools{
+  width: 100%;
+  background-color: beige;
+  margin-bottom: 2vh;
+  list-style: none;
+  display: flex;
+  justify-content:center;
+  
+
+  .one{
+    text-align: center;
+
+  }
+}
+
+.page-wrapper {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  min-height: 100px;           /* a little placeholder height */
+}
+canvas.pdf-page {
+  background: white;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
 
 @media (max-width: 768px) {
   .main-layout,

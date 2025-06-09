@@ -1,35 +1,40 @@
-const url = pdfPath;        
-let pdfDoc = null;
-let currentZoom = 1.0;
+const url          = pdfPath;
+let   pdfDoc       = null;
+let   currentZoom  = 1.5;
 const pdfContainer = document.getElementById('pdf-container');
 
-// 1) Load PDF
-pdfjsLib.getDocument(url).promise.then(function(pdf) {
-  pdfDoc = pdf;
-  setupPageWrappers();
-});
+// Track in-flight render tasks per canvas:
+const renderTasks = new WeakMap();  // canvas → current RenderTask
 
-// 2) Create an empty wrapper for each page
-function setupPageWrappers() {
+pdfjsLib.getDocument(url).promise
+  .then(pdf => {
+    pdfDoc = pdf;
+    buildPageWrappers();
+  })
+  .catch(err => console.error('PDF load error:', err));
+
+function buildPageWrappers() {
   const frag = document.createDocumentFragment();
   for (let i = 1; i <= pdfDoc.numPages; i++) {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'page-wrapper';
-    wrapper.dataset.pageNumber = i;
-    frag.appendChild(wrapper);
-    observer.observe(wrapper);
+    const w = document.createElement('div');
+    w.className = 'page-wrapper';
+    w.dataset.pageNumber = i;
+    frag.appendChild(w);
+    observer.observe(w);
   }
   pdfContainer.appendChild(frag);
 }
 
-// 3) IntersectionObserver to lazy-render / teardown
-const observer = new IntersectionObserver((entries) => {
+const observer = new IntersectionObserver(entries => {
   entries.forEach(entry => {
     const wrapper = entry.target;
-    const pageNum = parseInt(wrapper.dataset.pageNumber, 10);
+    const pageNum = +wrapper.dataset.pageNumber;
 
     if (entry.isIntersecting) {
-      // if no canvas yet, create one
+      const newUrl = new URL(window.location);
+      newUrl.searchParams.set('pageNum', pageNum);
+      window.history.replaceState({}, '', newUrl);
+
       let canvas = wrapper.querySelector('canvas');
       if (!canvas) {
         canvas = document.createElement('canvas');
@@ -38,48 +43,86 @@ const observer = new IntersectionObserver((entries) => {
       }
       renderPage(pageNum, canvas);
     } else if (wrapper.querySelector('canvas')) {
-      // far out of view: remove to free memory
+      // Remove off-screen canvases to save memory
       wrapper.innerHTML = '';
     }
   });
 }, {
-  root: null,               // viewport
-  rootMargin: '500px 0px',  // preload 500px above & below
-  threshold: 0.01
+  root: null,
+  rootMargin: '500px 0px',
+  threshold: [0, 0.1, 0.5, 1.0]
 });
 
-// 4) Render one page into its canvas
 function renderPage(pageNum, canvas) {
-  const ctx = canvas.getContext('2d');
+  // 1) Cancel any in-flight render on this canvas
+  const previousTask = renderTasks.get(canvas);
+  if (previousTask) {
+    previousTask.cancel();
+    renderTasks.delete(canvas);
+  }
+
+  // 2) Start new render
   pdfDoc.getPage(pageNum).then(page => {
-    const vp = page.getViewport({ scale: currentZoom });
+    const vp  = page.getViewport({ scale: currentZoom });
+    const ctx = canvas.getContext('2d');
     canvas.width  = vp.width;
     canvas.height = vp.height;
-    page.render({ canvasContext: ctx, viewport: vp });
-  });
-}
 
-// 5) Zoom controls
-function zoomIn()    { currentZoom = Math.min(currentZoom + 0.1, 3.0); applyZoom(); }
-function zoomOut()   { currentZoom = Math.max(currentZoom - 0.1, 0.1); applyZoom(); }
-function setZoom(v)  {
-  const z = parseFloat(v.replace('%',''))/100;
-  if (z>0) { currentZoom = z; applyZoom(); }
-}
-function handleZoomChange(val) {
-  currentZoom = (val==='fit-width' ? 3.0 : 1.5);
-  applyZoom();
+    const renderTask = page.render({ canvasContext: ctx, viewport: vp });
+    renderTasks.set(canvas, renderTask);
+
+    // 3) Clean up when done or cancelled
+    renderTask.promise
+      .then(() => renderTasks.delete(canvas))
+      .catch(err => {
+        if (err.name !== 'RenderingCancelledException') {
+          console.error('Render error:', err);
+        }
+        renderTasks.delete(canvas);
+      });
+  });
 }
 
 function applyZoom() {
-  // update input
-  document.getElementById('zoom').value = Math.round(currentZoom*100) + '%';
-  // re-render only the currently-visible wrappers
-  document.querySelectorAll('.page-wrapper').forEach(wrapper => {
-    const canvas = wrapper.querySelector('canvas');
-    if (canvas) {
-      // page is (or was) in view → re-render
-      renderPage(parseInt(wrapper.dataset.pageNumber,10), canvas);
-    }
+  document.querySelectorAll('.page-wrapper canvas').forEach(canvas => {
+    const pageNum = +canvas.parentElement.dataset.pageNumber;
+    renderPage(pageNum, canvas);
   });
 }
+
+function zoomIn()  { currentZoom = Math.min(currentZoom + 0.1, 3.0); applyZoom(); }
+function zoomOut() { currentZoom = Math.max(currentZoom - 0.1, 0.1); applyZoom(); }
+
+function handleZoomChange(val) {
+  if (val === 'fit-width') {
+    pdfDoc.getPage(1).then(page => {
+      const vp1 = page.getViewport({ scale: 1 });
+      currentZoom = pdfContainer.clientWidth / vp1.width;
+      applyZoom();
+    });
+  }
+  else if (val === 'fit-page') {
+    pdfDoc.getPage(1).then(page => {
+      const vp1    = page.getViewport({ scale: 1.1 });
+      const scaleX = pdfContainer.clientWidth / vp1.width;
+      const scaleY = window.innerHeight / vp1.height;
+      currentZoom   = Math.min(scaleX, scaleY);
+      applyZoom();
+    });
+  }
+  else {
+    currentZoom = 3.0;
+    applyZoom();
+  }
+}
+
+document.getElementById('zoom-in')
+        .addEventListener('click', () => zoomIn());
+document.getElementById('zoom-out')
+        .addEventListener('click', () => zoomOut());
+document.getElementById('page-zoom')
+        .addEventListener('change', e => handleZoomChange(e.target.value));
+
+// Expose controls if needed elsewhere
+window.pdfViewer = { zoomIn, zoomOut, handleZoomChange };
+

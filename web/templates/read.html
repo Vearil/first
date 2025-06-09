@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/notes.css') }}" />
+<style>
+    #pdfViewer {
+        width: 100%;
+        height: 100vh;
+    }
+</style>
+{% endblock %}
+{% block title %}{{ book.name }}{% endblock %}
+{% block navclass %} class="align-right top-nav"{% endblock %}
+{% block container %}
+<div class="main-layout">
+  {% block content %}
+    <iframe id="pdfViewer" src="/static/books/{{ book.bookPath }}"></iframe>
+  {% endblock %}
+</div>
+{% endblock %}
+{% block javascript %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.min.js"></script>
+<script>
+  const pdfUrl = "{{ pdf_path }}";
+  const iframe = document.getElementById('pdfViewer');
+  iframe.onerror = () => console.error('Failed to load PDF');
+</script>
+{% endblock %}

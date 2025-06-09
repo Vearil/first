@@ -4,7 +4,6 @@ from os import path
 from flask_login import LoginManager
 from flask_admin import Admin
 from flask_wtf import FlaskForm
-from flask_migrate import Migrate
 import os
 
 
@@ -13,7 +12,6 @@ DB_NAME = "database.db"
 
 def create_app():
     app = Flask(__name__)
-    migrate = Migrate(app, db)
     app.config['SECRET_KEY'] = 'hjshjhdjah kjshkjdhjs'
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
     app.secret_key = os.environ.get('SECRET_KEY', 'fallback_dev_key')

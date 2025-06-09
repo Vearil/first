@@ -10,17 +10,18 @@
 {% block content %}
 
 <div class="div1 pdf-viewer">
-  <ul class="tools"> 
+<ul class="tools"> 
+  
   <li>
     <button id="zoom-in" onClick="zoomIn()">
-      <img src="/static/img/zoom-in.png" alt="Zoom In"/>
+      <img src="/static/img/zoom-in.svg" alt="Zoom In"/>
     </button>
   </li>
+
   <li>
-    <form>
-      <input class="one" type="text" value="100" id="zoom" onChange="setZoom(this.value)" />
-    </form>
+    <div> {{ page }} </div>
   </li>
+  
   <li>
     <form>
       <select id="page-zoom" onchange="handleZoomChange(this.value)">
@@ -32,9 +33,10 @@
   </li>
   <li>
     <button id="zoom-out" onClick="zoomOut()">
-      <img src="/static/img/zoom-out.png" alt="Zoom Out"/>
+      <img src="/static/img/zoom-out.svg" alt="Zoom Out"/>
     </button>
   </li>
+  
 </ul>
   <div id="pdf-container"></div>
 </div>

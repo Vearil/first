@@ -66,6 +66,7 @@ function toggleLayout() {
   const layout = document.querySelector('.main-layout');
   const btnImg = document.getElementById('button-image');
   const topNav = document.querySelector('.top-nav');
+  const tools = document.querySelector('.tools');
 
   const isReversed = layout.classList.toggle('reversed');
 
@@ -73,6 +74,8 @@ function toggleLayout() {
   
   topNav.classList.toggle('align-right', !isReversed);
   topNav.classList.toggle('align-left', isReversed);
+  tools.classList.toggle('align-right', !isReversed);
+  tools.classList.toggle('align-left', isReversed);
 
 }
 function toggleNotes() {

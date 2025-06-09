@@ -153,20 +153,71 @@ button:focus {
   width: 33%;
 }
 
-.tools{
-  width: 100%;
-  background-color: beige;
+.main-layout.reversed .tools{
+  width: 32%;
+  background-color: rgb(185, 185, 185);
   margin-bottom: 2vh;
   list-style: none;
   display: flex;
   justify-content:center;
+  border-radius: 5vh;
+  position: absolute;
+  top: 6vh;
+  left: 3vh;
+  display: flex;
   
+}
 
+.main-layout:not(.reversed) .tools{
+  width: 63%;
+  background-color: rgb(185, 185, 185);
+  margin-bottom: 2vh;
+  list-style: none;
+  display: flex;
+  justify-content:center;
+  border-radius: 5vh;
+  position: absolute;
+  top: 0;
+  left: 3vh;
+  display: flex;
+  
+}
+.tools {
+  background-color: rgb(185, 185, 185);
+  margin-bottom: 2vh;
+  list-style: none;
+  display: flex;
+  justify-content:center;
+  border-radius: 5vh;
+  
+ 
+  form select{
+    border-radius: 5vh;
+    background-color: white;
+  }
+  li{
+    width: auto;
+    height: 100%;
+    background-color: white;
+    border: none;
+    border-radius: 10vh;
+    margin: 5px;
+  }
+
+  li button{
+    border: none;
+    background-color: white;
+    border-radius: 5vh;
+    margin-left: 1vh;
+    margin-right: 1vh;
+  }
+  
   .one{
     text-align: center;
 
   }
 }
+
 
 .page-wrapper {
   margin-bottom: 20px;

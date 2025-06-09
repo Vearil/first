@@ -75,23 +75,28 @@ def books(book_id):
     if book.user_id != current_user.id:
         return redirect(url_for('views.home'))
 
-    if request.args.get('show_pdf') == 'true':
-        pdf_path = os.path.join(current_app.root_path, 'books')
-        return send_file(pdf_path)
-    
-    return render_template("notes.html", user=current_user, book=book)
+    pdf_path = url_for('static', filename=f'books/{book.bookPath}')  
 
+    return render_template(
+        "read.html",
+        user=current_user,
+        book=book,
+        book_id=book_id,
+        user_id=current_user.id,
+        pdf_path=pdf_path
+    )
 @views.route('/book/<int:book_id>/notes', methods=['GET', 'POST'])
 @login_required
 def book_notes(book_id):
     book = Book.query.get_or_404(book_id)
+    page = request.args.get('pageNum', 1, type=int)
 
     pdf_path = url_for('static', filename=f'/books/{book.bookPath}')
 
     if book.user_id != current_user.id:
         return redirect(url_for('views.home'))
 
-    return render_template("notes.html", user=current_user, book=book, book_id=book_id, user_id=current_user.id, pdf_path=pdf_path)
+    return render_template("notes.html", user=current_user, book=book, book_id=book_id, user_id=current_user.id, pdf_path=pdf_path, page = page)
 
 @views.route('/add_note', methods=['POST'])
 @login_required
